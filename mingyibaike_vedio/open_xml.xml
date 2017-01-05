@@ -1,0 +1,29 @@
+	<item>
+    <key><![CDATA[video_id]]></key>
+    <display>
+      <title><![CDATA[item_title]]></title> headline_专家视频_百科名医
+      <url><![CDATA[phone_url]]></url>
+      <pcurl><![CDATA[pc_url]]></pcurl>
+      <link><![CDATA[phone_url]]></link>
+      <pclink><![CDATA[pc_url]]></pclink>
+      <headline><![CDATA[video_title]]></headline>
+      <summary><![CDATA[video_content]]></summary>
+      <rank_default><![CDATA[video_id]]></rank_default>
+      <pv><![CDATA[video_pv]]></pv>
+      <disease><![CDATA[video_hot_word]]></disease>
+      <tag><![CDATA[disease_tag]]></tag>
+      <label><![CDATA[disease_label]]></label>
+      <sub_label><![CDATA[disease_sub_label]]></sub_label>
+      <longword><![CDATA[disease_longword]]></longword>
+      <body><![CDATA[disease_body]]></body>
+      <dept><![CDATA[hospital_department]]></dept>
+      <doctor><![CDATA[doctor_name]]></doctor>
+      <rank><![CDATA[doctor_title]]></rank>
+      <hospital><![CDATA[hospital_name]]></hospital>
+      <img><![CDATA[video_img]]></img>
+      <duration><![CDATA[vedio_time]]></duration>
+      <time><![CDATA[vedio_publish_time]]></time>
+      <type><![CDATA[vedio_type]]></type>
+    </display>
+  </item>
+</DOCUMENT>
