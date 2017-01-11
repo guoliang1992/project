@@ -19,7 +19,7 @@ class tools:
 	@staticmethod
 	def  isNone(obj):
 		if obj:
-			return obj.strip(" ").replace("\r\n","@@@")
+			return obj.strip().replace("\r\n","@@@")
 
 		else:
 			return ""
@@ -28,23 +28,29 @@ class tools:
 			return video_url_map[obj]
 	
 	def replace_doctor_url(self, doctor_name, doctor_url):
-		doctor_name_4_gbk = doctor_name.encode('gbk','ignore')
+		doctor_name_4_gbk = doctor_name.strip('\t').encode('gbk','ignore')
 		if doctor_name_4_gbk in mingyi_url:
-			fields = mingyi_url[doctor_name_4_gbk].split("\t")
-			
+			fields = mingyi_url[doctor_name_4_gbk].strip().split("\t")
 			if doctor_url == fields[1]:
 				return  fields[2]
+
 			elif (not doctor_url) and fields[2]:
 				return fields[2]
 		else:
 			return doctor_url
-		
+
+	def replace_xml_val(self, key, xml_key, item_dict, hospitalXmlNode):
+		if key in item_dict:
+			hospitalXmlNode = hospitalXmlNode.replace(xml_key,item_dict[key])	
+		else:
+			hospitalXmlNode = hospitalXmlNode.replace(xml_key, "")
+		return hospitalXmlNode
 
 	def getjsondata(self,filename,hospitalXml,expert,zhiliao):
 		anthor_name_dic = dict()
 		baseUrl = 'http://app.baikemy.com/disease/cs/31002333941249/'
 		output = open("finalxml","wa")
-		output.write('<?xml version="1.0" encoding="gbk"?>'+"\n")
+		output.write('<?xml version="1.0" encoding="utf-8"?>'+"\n")
 		output.write('<DOCUMENT>')
  		for line in open(filename): 
 			hospitalXmlNode = hospitalXml
@@ -102,7 +108,6 @@ class tools:
 					elif name == u'²¢·¢Ö¢':
 					 	item_dict['symptom_name=bing_fa_zheng'] = self.isNone(items['content'])
 
-			print item_dict['symptom_name=qitazhengzhuang'].encode('gbk','ignore')
 			#cure
 			cure_list = data['cure']
 			item_dict['cure'] = cure_list
@@ -115,6 +120,9 @@ class tools:
 			zhiliaoitems = ""
 			zhiliaorank_val = 1
 			for cureitem in item_dict['cure']:
+				if zhiliaorank_val > 3:
+					break
+				
 				if cureitem['name'] and cureitem['content']:
 					itemXml = zhiliaoNode.replace('zhi_liao_fang_zhen',self.isNone(cureitem['name']))
 					itemXml = itemXml.replace('cure_name=zhiliaofangzhen',self.isNone(cureitem['content']))
@@ -123,25 +131,27 @@ class tools:
 					zhiliaoitems += itemXml
 
 			hospitalXmlNode = hospitalXmlNode.replace('zhiliao_item',zhiliaoitems)
-			hospitalXmlNode = hospitalXmlNode.replace('symptom_name=dianxingzhenzhuang',item_dict['symptom_name=dianxingzhenzhuang'])
-			hospitalXmlNode = hospitalXmlNode.replace('symptom_name=qitazhengzhuang',item_dict['symptom_name=qitazhengzhuang'])
-			if 'symptom_name=bing_fa_zheng' in item_dict:
-				hospitalXmlNode = hospitalXmlNode.replace('symptom_name=bing_fa_zheng',item_dict['symptom_name=bing_fa_zheng'])
-			else:
-				hospitalXmlNode = hospitalXmlNode.replace('symptom_name=bing_fa_zheng',"")
+			#key, xml_key, itemdic, hospitalXmlNode
+			hospitalXmlNode = self.replace_xml_val('symptom_name=qitazhengzhuang', 'symptom_name=qitazhengzhuang', item_dict, hospitalXmlNode) 
+			hospitalXmlNode = self.replace_xml_val('symptom_name=dianxingzhenzhuang', 'symptom_name=dianxingzhenzhuang', item_dict, hospitalXmlNode)
+			hospitalXmlNode = self.replace_xml_val('symptom_name=bing_fa_zheng', 'symptom_name=bing_fa_zheng', item_dict, hospitalXmlNode)	
+			
 			
 			expertNode_item = ""
 			rank_val = 1
 			for expert_item in item_dict['expert']:
-					itemXml = expertNode.replace('expert_expertName',self.isNone(expert_item['expertName']))
-					itemXml = itemXml.replace('expert_status',self.isNone(expert_item['status']))
-					itemXml = itemXml.replace('expert_lastFirstInstitutionName',self.isNone(expert_item['lastFirstInstitutionName']))
-					itemXml = itemXml.replace('expert_lastSecondInstitutionName',self.isNone(expert_item['lastSecondInstitutionName']))
-					itemXml = itemXml.replace('expertposition',self.isNone(expert_item['position']))
-					itemXml = itemXml.replace('expert_expertUrl',self.isNone(self.replace_doctor_url(expert_item['expertName'], expert_item['expertUrl'])))
-					itemXml = itemXml.replace('rank_val',str(rank_val))
-					rank_val += 1
-					expertNode_item += itemXml
+				if rank_val > 3:
+					break
+
+				itemXml = expertNode.replace('expert_expertName',self.isNone(expert_item['expertName']))
+				itemXml = itemXml.replace('expert_status',self.isNone(expert_item['status']))
+				itemXml = itemXml.replace('expert_lastFirstInstitutionName',self.isNone(expert_item['lastFirstInstitutionName']))
+				itemXml = itemXml.replace('expert_lastSecondInstitutionName',self.isNone(expert_item['lastSecondInstitutionName']))
+				itemXml = itemXml.replace('expertposition',self.isNone(expert_item['position']))
+				itemXml = itemXml.replace('expert_expertUrl',self.isNone(self.replace_doctor_url(expert_item['expertName'], expert_item['expertUrl'])))
+				itemXml = itemXml.replace('rank_val',str(rank_val))
+				rank_val += 1
+				expertNode_item += itemXml
 
 			hospitalXmlNode = hospitalXmlNode.replace('expert_item',expertNode_item)
 			
@@ -154,25 +164,17 @@ class tools:
 			hospitalXmlNode = hospitalXmlNode.replace('basic_name=zhengzhuang',item_dict['basic_name=zhengzhuang'])
 			hospitalXmlNode = hospitalXmlNode.replace('basic_name=zenduan',item_dict['basic_name=zenduan'])
 			hospitalXmlNode = hospitalXmlNode.replace('basic_name=zhiliao',item_dict['basic_name=zhiliao'])
-			hospitalXmlNode = hospitalXmlNode.replace('basic_name=liuxingbingxue',item_dict['basic_name=liuxingbingxue'])
-			if 'basic_name=zhidao' in item_dict:
-				hospitalXmlNode = hospitalXmlNode.replace('basic_name=zhidao',item_dict['basic_name=zhidao'])
-			else:
-				hospitalXmlNode = hospitalXmlNode.replace('basic_name=zhidao',"")
-			
+			hospitalXmlNode = self.replace_xml_val('basic_name=liuxingbingxue', 'basic_name=liuxingbingxue', item_dict, hospitalXmlNode)
+			hospitalXmlNode = self.replace_xml_val('basic_name=zhidao', 'basic_name=zhidao', item_dict, hospitalXmlNode)
 			hospitalXmlNode = hospitalXmlNode.replace('summaryUrl',item_dict['summaryUrl'])
 			hospitalXmlNode = hospitalXmlNode.replace('summaryKey',str(item_dict['summarykey']))
 			hospitalXmlNode = hospitalXmlNode.replace('anthorName',item_dict['anthor_name'])
 			hospitalXmlNode = hospitalXmlNode.replace('defaultzhengzhuang',u'Ö¢×´')
 			hospitalXmlNode = hospitalXmlNode.replace('defaultzhiliao',u'ÖÎÁÆ')
-			if 'gao_fa_ren_qun'	in item_dict:
-				hospitalXmlNode = hospitalXmlNode.replace('gao_fa_ren_qun',item_dict['gao_fa_ren_qun'])
-			else:
-				hospitalXmlNode = hospitalXmlNode.replace('gao_fa_ren_qun',"")
-			if 'basic_name=zhiyuxing' in item_dict:
-				hospitalXmlNode = hospitalXmlNode.replace('basic_name=zhiyuxing',item_dict['basic_name=zhiyuxing'])
-			else:
-				hospitalXmlNode = hospitalXmlNode.replace('basic_name=zhiyuxing',"")
+			
+			hospitalXmlNode = self.replace_xml_val('gao_fa_ren_qun', 'gao_fa_ren_qun', item_dict, hospitalXmlNode)
+			hospitalXmlNode = self.replace_xml_val('basic_name=zhiyuxing', 'basic_name=zhiyuxing', item_dict, hospitalXmlNode)
+			print hospitalXmlNode.encode('utf-8','ignore')	
 			output.write(hospitalXmlNode.encode('utf-8','ignore'))
 		output.write('</DOCUMENT>')
 
@@ -180,9 +182,9 @@ hospitalXml = u'''
 <item>
 	<key><![CDATA[summaryKey]]></key>
 	<display>
-		<disease><![CDATA[diseasename]]></disease>
+		<title><![CDATA[diseasename]]></title>
 	  	<other_name><![CDATA[anthorName]]></other_name>
-	  	<videoUrl><![CDATA[viderUrl]]></videoUrl>
+	  	<url><![CDATA[viderUrl]]></url>
 	  	<videoImg_url><![CDATA[video_Img]]></videoImg_url>
 	  	<summary><![CDATA[basic_namegaishu]]></summary>
 		<summary_link><![CDATA[summaryUrl]]></summary_link>
