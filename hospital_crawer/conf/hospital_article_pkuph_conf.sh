@@ -1,0 +1,8 @@
+ArticleListUrl="/search/odin/DataCenter/Url/output/hospital_article_pkuph_list_urls"
+ArticleListPage="/search/odin/DataCenter/Crawler/output/hospital_article_pkuph_list_page"
+ArticleListResult="/search/odin/DataCenter/Parser/output/hospital_article_pkuph_list_result"
+ArticleDetailUrl="/search/odin/DataCenter/Url/output/hospital_article_pkuph_detail_urls"
+ArticleDetailPage="/search/odin/DataCenter/Crawler/output/hospital_article_pkuph_detail_page"
+ArticleDetailResult="/search/odin/DataCenter/Parser/output/hospital_article_pkuph_detail_result"
+ArticleListParser="/search/odin/DataCenter/Parser/bin/hospital_article_pkuph_list_parser.py"
+ArticleDetailParser="/search/odin/DataCenter/Parser/bin/hospital_article_pkuph_detail_parser.py"
