@@ -1,0 +1,1 @@
+kafka_test使用 kafka-python 包来写的，包括读取知乎数据和微信数据
